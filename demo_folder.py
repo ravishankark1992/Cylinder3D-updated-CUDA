@@ -100,7 +100,7 @@ def main(args):
     demo_loss_list = []
     with torch.no_grad():
         for i_iter_demo, (_, demo_vox_label, demo_grid, demo_pt_labs, demo_pt_fea) in enumerate(
-                demo_dataset_loader):
+                tqdm(demo_dataset_loader)):
             demo_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in
                               demo_pt_fea]
             demo_grid_ten = [torch.from_numpy(i).to(pytorch_device) for i in demo_grid]
@@ -120,7 +120,7 @@ def main(args):
                 inv_labels = inv_labels.astype('uint32')
                 outputPath = save_dir + str(i_iter_demo).zfill(6) + '.label'
                 inv_labels.tofile(outputPath)
-                print("save " + outputPath)
+                # print("save " + outputPath)
             demo_loss_list.append(loss.detach().cpu().numpy())
 
     if demo_label_dir != '':

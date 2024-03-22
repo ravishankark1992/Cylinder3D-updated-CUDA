@@ -41,15 +41,15 @@ dataset_params:
 ###################
 ## Data_loader options
 train_data_loader:
-  data_path: "/data/dataset/semantic_kitti/data_semkitti/dataset/sequences/"
+  data_path: "/mnt/AEDAA789DAA74D01/resilio_sync/full_vldr_data/data_odometry/dataset/"
   imageset: "train"
   return_ref: True
-  batch_size: 2
+  batch_size: 4
   shuffle: True
   num_workers: 4
 
 val_data_loader:
-  data_path: "/data/dataset/semantic_kitti/data_semkitti/dataset/sequences/"
+  data_path: '/mnt/AEDAA789DAA74D01/resilio_sync/full_vldr_data/data_odometry/dataset/' # "/data/dataset/semantic_kitti/data_semkitti/dataset/sequences/"
   imageset: "val"
   return_ref: True
   batch_size: 1
@@ -60,7 +60,7 @@ val_data_loader:
 ###################
 ## Train params
 train_params:
-  model_load_path: "./model_load_dir/model_load.pt"
+  model_load_path: "./model_load_dir/mIOU63.pt"
   model_save_path: "./model_save_dir/model_save.pt"
   checkpoint_every_n_steps: 4599
   max_num_epochs: 40

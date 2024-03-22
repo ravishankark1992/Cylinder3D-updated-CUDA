@@ -1,3 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
 .DS_Store
+model_load_dir
+test_data
+demo_save
