@@ -4,6 +4,8 @@ from collections import Counter
 from argparse import ArgumentParser
 import yaml
 import os
+from glob import glob
+from tqdm import tqdm
 
 class EvalIou:
     def __init__(self, config_path):
@@ -19,19 +21,16 @@ class EvalIou:
         iou = np.sum(intersection) / np.sum(union)
         return iou
     
-
-
-def main(path_to_pred, path_to_gt, config_path):
-    config_path = os.path.join(config_path)
-    eval = EvalIou(config_path)
+def iou_calculate(path_to_pred, path_to_gt, config):
+    if path_to_pred.split('/')[-1] != path_to_gt.split('/')[-1]:
+        print(path_to_pred, path_to_gt)
     pred = np.fromfile(path_to_pred, dtype=np.uint16)
     pred = pred.reshape((-1))
     gt=np.fromfile(path_to_gt, dtype=np.uint16)
     gt=gt.reshape((-1))
     reshaped_pred = pred.reshape(int(len(pred)/2), 2)
     reshaped_gt = gt.reshape(int(len(gt)/2), 2)
-    labels = eval.config["labels"]
-    
+    labels = config["labels"]
     pred_counter = Counter(reshaped_pred[:, 0])
     gt_counter = Counter(reshaped_gt[:, 0])
     pred_label_values = {}
@@ -42,10 +41,34 @@ def main(path_to_pred, path_to_gt, config_path):
             pred_label_values[labels[item]] = pred_counter[item]
         if item in gt_counter.keys():
             gt_label_values[labels[item]] = gt_counter[item]
-    print("prediction: ", pred_label_values)
-    print("GT: ", gt_label_values)
-    score = eval.compute_iou(reshaped_pred[:, 0], reshaped_gt[:, 0])
-    print(score)
+    #print("prediction: ", pred_label_values)
+    #print("GT: ", gt_label_values)
+    return reshaped_pred, reshaped_gt
+    
+
+def main(path_to_pred, path_to_gt, config_path):
+    config_path = os.path.join(config_path)
+    eval = EvalIou(config_path)
+    score_list = []
+    folder_score_list = []
+    # loop
+    # for i in range(len(path_to_pred)):
+    pred_files = None
+    #reshaped_pred, reshaped_gt = iou_calculate(pred_files[2], gt_files[2], eval.config)
+    folder_list = ['0'+str(i) for i in range(0,10)]
+    folder_list.extend([str(i) for i in range(10,11)])
+    for folder in tqdm(folder_list):
+        pred_files = sorted(glob("/".join([path_to_pred, folder, "*.label"])))
+        gt_files = sorted(glob("/".join([path_to_gt, folder, "labels", "*.label"])))
+        import pdb
+        for idx, _ in enumerate(path_to_gt):
+            reshaped_pred, reshaped_gt = iou_calculate(pred_files[idx], gt_files[idx], eval.config)
+            score = eval.compute_iou(reshaped_pred[:, 0], reshaped_gt[:, 0])
+            score_list.append(score)
+        folder_score=np.mean(score_list)
+        folder_score_list.append(folder_score)
+    print("each folder score: ", folder_score_list)
+    print("overall_score: ", np.mean(folder_score_list))
 
 if __name__ == '__main__':
     parser = ArgumentParser()
