@@ -7,6 +7,17 @@ import os
 from glob import glob
 from tqdm import tqdm
 
+moving_remap = {
+    252: 10,
+    253: 11,
+    254: 30,
+    255: 32,
+    256: 16,
+    257: 13,
+    258: 18,
+    259: 20
+}
+
 class EvalIou:
     def __init__(self, config_path):
         with open(config_path, 'r') as config_file:
@@ -19,6 +30,8 @@ class EvalIou:
         intersection = np.logical_and(pred, gt)
         union = np.logical_or(pred, gt)
         iou = np.sum(intersection) / np.sum(union)
+        print("intersection, union", Counter(intersection), Counter(union))
+        print("iou: ", iou)
         return iou
     
 def iou_calculate(path_to_pred, path_to_gt, config):
@@ -31,18 +44,24 @@ def iou_calculate(path_to_pred, path_to_gt, config):
     reshaped_pred = pred.reshape(int(len(pred)/2), 2)
     reshaped_gt = gt.reshape(int(len(gt)/2), 2)
     labels = config["labels"]
+    # remap moving labels
+    y=reshaped_gt[:, 0]
+    for key in moving_remap.keys():
+        reshaped_gt[:, 0][reshaped_gt[:, 0] == key] = moving_remap[key]
     pred_counter = Counter(reshaped_pred[:, 0])
     gt_counter = Counter(reshaped_gt[:, 0])
     pred_label_values = {}
     gt_label_values = {}
     # Display with labels
+
     for item in labels:
         if item in pred_counter.keys():
             pred_label_values[labels[item]] = pred_counter[item]
         if item in gt_counter.keys():
             gt_label_values[labels[item]] = gt_counter[item]
-    #print("prediction: ", pred_label_values)
-    #print("GT: ", gt_label_values)
+    print("prediction: ", pred_label_values)
+    print("GT: ", gt_label_values)
+    import pdb; pdb.set_trace()
     return reshaped_pred, reshaped_gt
     
 
@@ -52,7 +71,6 @@ def main(path_to_pred, path_to_gt, config_path):
     score_list = []
     folder_score_list = []
     # loop
-    # for i in range(len(path_to_pred)):
     pred_files = None
     #reshaped_pred, reshaped_gt = iou_calculate(pred_files[2], gt_files[2], eval.config)
     folder_list = ['0'+str(i) for i in range(0,10)]
