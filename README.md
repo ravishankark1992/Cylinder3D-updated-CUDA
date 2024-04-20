@@ -95,3 +95,11 @@ If you find this work useful in your research, please consider citing the origin
   year={2020}
 }
 ```
+
+## Inference
+Save the predictions in the demo_save directory.
+gt path contains the sequences of ground truth labels.
+Run the iou_eval.py script with the following command:
+```
+python iou_eval.py --pred demo_save --gt /mnt/AEDAA789DAA74D01/resilio_sync/KITTI-VLDR-Dataset/data_odometry_labels/dataset/sequences
+```
